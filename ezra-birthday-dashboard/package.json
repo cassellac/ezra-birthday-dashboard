@@ -20,7 +20,9 @@
     "react-hot-toast": "^2.4.1",
     "date-fns": "^2.30.0",
     "swr": "^2.2.4",
-    "zustand": "^4.4.7"
+    "zustand": "^4.4.7",
+    "@supabase/auth-helpers-nextjs": "^0.10.0",
+    "@supabase/auth-helpers-react": "^0.4.1"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
