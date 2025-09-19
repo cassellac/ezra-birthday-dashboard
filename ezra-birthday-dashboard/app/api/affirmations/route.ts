@@ -1,69 +1,88 @@
-import { NextResponse } from 'next/server'
-import OpenAI from 'openai'
-import type { AffirmationEntry } from '@/types/content'
-
-const IN_MEMORY_LOG: AffirmationEntry[] = []
-
-const FALLBACK_AFFIRMATIONS: AffirmationEntry[] = [
-  {
-    id: 'welcome',
-    message: 'I am grateful for my family and the adventures we share.',
-    summary: 'Grateful for family adventures',
-    createdAt: new Date().toISOString(),
-  },
-]
+import { NextResponse } from 'next/server';
+import OpenAI from 'openai';
+import type { AffirmationEntry } from '@/types/dashboard';
+import { createRouteHandlerSupabaseClient } from '@/lib/supabase/route';
 
 export async function GET() {
-  return NextResponse.json({ entries: IN_MEMORY_LOG.length ? IN_MEMORY_LOG : FALLBACK_AFFIRMATIONS })
+  const supabase = createRouteHandlerSupabaseClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session) {
+    return NextResponse.json([] satisfies AffirmationEntry[]);
+  }
+
+  const { data, error } = await supabase
+    .from('affirmations')
+    .select('*')
+    .eq('user_id', session.user.id)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('[Affirmations] fetch error', error);
+    return NextResponse.json([], { status: 500 });
+  }
+
+  return NextResponse.json(data as AffirmationEntry[]);
 }
 
 export async function POST(request: Request) {
-  const body = await request.json().catch(() => null) as { message?: string } | null
+  const supabase = createRouteHandlerSupabaseClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  if (!body?.message || !body.message.trim()) {
-    return NextResponse.json({ error: 'Message is required' }, { status: 400 })
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const apiKey = process.env.OPENAI_API_KEY
-  let summary = body.message.trim()
+  const { prompt } = (await request.json()) as { prompt?: string };
+  if (!prompt || !prompt.trim()) {
+    return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
+  }
+
+  let summary = prompt.trim();
+  const apiKey = process.env.OPENAI_API_KEY;
 
   if (apiKey) {
+    const client = new OpenAI({ apiKey });
     try {
-      const client = new OpenAI({ apiKey })
-      const completion = await client.responses.create({
+      const response = await client.responses.create({
         model: 'gpt-4o-mini',
         input: [
           {
             role: 'system',
-            content: 'Summarize affirmations warmly in under 12 words.'
+            content:
+              'You are a warm motivational coach for a 13-year-old named Ezra. Respond with a short, 2-sentence affirmation summarizing the parent-provided note. Output plain text only.',
           },
           {
             role: 'user',
-            content: body.message,
+            content: prompt,
           },
         ],
-        temperature: 0.6,
-      })
-      const text = completion.output_text?.trim()
-      if (text) {
-        summary = text.replace(/^"|"$/g, '')
-      }
+        temperature: 0.8,
+      });
+      summary = response.output_text.trim();
     } catch (error) {
-      console.error('OpenAI affirmation summary error', error)
+      console.error('[Affirmations] OpenAI error', error);
     }
   }
 
-  const entry: AffirmationEntry = {
-    id: crypto.randomUUID(),
-    message: body.message.trim(),
-    summary,
-    createdAt: new Date().toISOString(),
+  const { data, error } = await supabase
+    .from('affirmations')
+    .insert({
+      user_id: session.user.id,
+      prompt,
+      summary,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('[Affirmations] insert error', error);
+    return NextResponse.json({ error: 'Database error' }, { status: 500 });
   }
 
-  IN_MEMORY_LOG.unshift(entry)
-  if (IN_MEMORY_LOG.length > 20) {
-    IN_MEMORY_LOG.length = 20
-  }
-
-  return NextResponse.json({ entry })
+  return NextResponse.json(data as AffirmationEntry, { status: 201 });
 }
