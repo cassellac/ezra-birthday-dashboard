@@ -1,0 +1,21 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title>Ezra avatar placeholder</title>
+  <desc>Stylized illustration placeholder for Ezra with gradients.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="50%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#ec4899" />
+    </linearGradient>
+    <linearGradient id="shirt" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0ea5e9" />
+      <stop offset="100%" stop-color="#22d3ee" />
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="32" fill="url(#bg)" />
+  <circle cx="100" cy="78" r="46" fill="#f8fafc" opacity="0.9" />
+  <path d="M62 162c10-28 30-44 38-44s28 16 38 44" fill="url(#shirt)" />
+  <circle cx="86" cy="78" r="8" fill="#1e293b" />
+  <circle cx="114" cy="78" r="8" fill="#1e293b" />
+  <path d="M82 108c12 10 24 10 36 0" stroke="#1e293b" stroke-width="6" stroke-linecap="round" fill="none" />
+</svg>
