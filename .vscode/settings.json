@@ -1,0 +1,9 @@
+{
+    "accessibility.signalOptions.volume": 15,
+    "accessibility.signals.chatEditModifiedFile": {
+        "sound": "off"
+    },
+    "accessibility.signals.chatRequestSent": {
+        "sound": "off"
+    }
+}
