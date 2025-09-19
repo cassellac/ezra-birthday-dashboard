@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-inter, 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+  background: radial-gradient(circle at top, rgba(76, 29, 149, 0.35), transparent 60%), #0f172a;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  border-radius: 24px;
+  box-shadow: 0 24px 50px rgba(15, 23, 42, 0.15), inset 0 0 80px rgba(255, 255, 255, 0.2);
+  transform-style: preserve-3d;
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  transform: translateY(-6px) rotateX(2deg);
+  box-shadow: 0 32px 70px rgba(15, 23, 42, 0.2), inset 0 0 120px rgba(255, 255, 255, 0.25);
+}
+
+.card-3d {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 24px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: all 0.4s ease;
+  box-shadow: 0 20px 50px rgba(30, 41, 59, 0.35), 0 0 60px rgba(102, 126, 234, 0.35);
+}
+
+.card-3d:hover {
+  transform: translateY(-12px) rotateX(6deg) rotateY(-5deg);
+  box-shadow: 0 30px 80px rgba(30, 41, 59, 0.45), 0 0 90px rgba(102, 126, 234, 0.45);
+}
+
+.earth-tone-card {
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+}
+
+.ocean-card {
+  background: linear-gradient(135deg, #1e3a8a 0%, #0ea5e9 100%);
+}
+
+.forest-card {
+  background: linear-gradient(135deg, #0f766e 0%, #34d399 100%);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.7);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(226, 232, 240, 0.9);
+}
