@@ -19,11 +19,13 @@ export async function GET() {
       explanation: data.explanation
     });
   } catch (error) {
-    // Fallback to Unsplash space image
+    // Log the error for debugging purposes
+    console.error('Error fetching NASA APOD:', error);
+    // Fallback to Unsplash space image, and indicate an error occurred
     return NextResponse.json({
       url: 'https://source.unsplash.com/random/1920x1080/?space,galaxy',
-      title: 'Space Background',
-      explanation: 'Beautiful space imagery'
-    });
+      title: 'Space Background (Fallback)',
+      explanation: 'Could not fetch NASA APOD. Showing fallback image. Error: ' + (error instanceof Error ? error.message : String(error))
+    }, { status: 502 });
   }
 }
