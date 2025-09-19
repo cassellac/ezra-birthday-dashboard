@@ -19,6 +19,7 @@ This is a heartfelt belated birthday gift - a custom dashboard-style web app des
 - **Connections Library** - Manage integrations and plugins
 
 ### 🎵 Interactive Sections
+
 - **🎧 Spotify Player** - Stream music directly in the dashboard
 - **⚙️ IFTTT Automations** - NASA space photos, group messaging
 - **📚 News & Facts Feed** - The Weekly Junior, fishing facts, local spots
