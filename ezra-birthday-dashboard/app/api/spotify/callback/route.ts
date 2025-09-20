@@ -1,7 +1,20 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createRouteHandlerSupabaseClient } from '@/lib/supabase/route';
-import { createAdminSupabaseClient } from '@/lib/supabase/admin';
+import {
+  createAdminSupabaseClient,
+  MissingSupabaseAdminCredentialsError,
+} from '@/lib/supabase/admin';
+
+const MISSING_ADMIN_ENV_MESSAGE =
+  'Supabase admin credentials are not configured. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_KEY to store Spotify tokens.';
+
+function buildMissingEnvRedirect(originUrl: URL, missingEnvVars: string[]) {
+  const redirectUrl = new URL('/?spotify=error', originUrl.origin);
+  redirectUrl.searchParams.set('missingSupabaseEnv', missingEnvVars.join(','));
+  redirectUrl.searchParams.set('message', MISSING_ADMIN_ENV_MESSAGE);
+  return redirectUrl;
+}
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -31,7 +44,8 @@ export async function GET(request: Request) {
 
   const clientId = process.env.SPOTIFY_CLIENT_ID;
   const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-  const redirectUri = process.env.SPOTIFY_REDIRECT_URI ?? `${process.env.NEXT_PUBLIC_URL ?? 'http://localhost:3000'}/api/spotify/callback`;
+  const redirectUri =
+    process.env.SPOTIFY_REDIRECT_URI ?? `${process.env.NEXT_PUBLIC_URL ?? 'http://localhost:3000'}/api/spotify/callback`;
 
   if (!clientId || !clientSecret) {
     return NextResponse.redirect(new URL('/?spotify=error', url.origin));
@@ -61,8 +75,20 @@ export async function GET(request: Request) {
   const expiresIn = tokenJson.expires_in as number;
   const scope = tokenJson.scope as string | undefined;
 
-  const admin = createAdminSupabaseClient();
-  const { error } = await admin
+  let admin;
+  try {
+    admin = createAdminSupabaseClient();
+  } catch (error) {
+    if (error instanceof MissingSupabaseAdminCredentialsError) {
+      console.error('[Spotify] Supabase admin credentials missing during callback');
+      return NextResponse.redirect(buildMissingEnvRedirect(url, error.missingEnvVars));
+    }
+
+    console.error('[Spotify] Unexpected error creating Supabase admin client', error);
+    return NextResponse.redirect(new URL('/?spotify=error', url.origin));
+  }
+
+  const { error: persistError } = await admin
     .from('spotify_tokens')
     .upsert(
       {
@@ -75,8 +101,8 @@ export async function GET(request: Request) {
       { onConflict: 'user_id' }
     );
 
-  if (error) {
-    console.error('[Spotify] failed to persist tokens', error);
+  if (persistError) {
+    console.error('[Spotify] failed to persist tokens', persistError);
     return NextResponse.redirect(new URL('/?spotify=error', url.origin));
   }
 

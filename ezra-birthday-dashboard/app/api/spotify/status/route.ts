@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
 import type { SpotifyTopTrack } from '@/types/dashboard';
 import { createRouteHandlerSupabaseClient } from '@/lib/supabase/route';
-import { createAdminSupabaseClient } from '@/lib/supabase/admin';
+import {
+  createAdminSupabaseClient,
+  MissingSupabaseAdminCredentialsError,
+} from '@/lib/supabase/admin';
 
 const SPOTIFY_API_BASE = 'https://api.spotify.com/v1';
+const MISSING_ADMIN_ENV_MESSAGE =
+  'Supabase admin credentials are not configured. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_KEY to manage Spotify connections.';
 
 interface SpotifyTokens {
   user_id: string;
@@ -50,15 +55,42 @@ export async function GET() {
     return NextResponse.json({ connected: false, tracks: [] });
   }
 
-  const admin = createAdminSupabaseClient();
-  const { data: token, error } = await admin
+  let admin;
+  try {
+    admin = createAdminSupabaseClient();
+  } catch (error) {
+    if (error instanceof MissingSupabaseAdminCredentialsError) {
+      console.error('[Spotify] Supabase admin credentials missing for status route');
+      return NextResponse.json(
+        {
+          connected: false,
+          tracks: [],
+          message: MISSING_ADMIN_ENV_MESSAGE,
+          missingEnvVars: error.missingEnvVars,
+        },
+        { status: 503 }
+      );
+    }
+
+    console.error('[Spotify] Unexpected error creating Supabase admin client', error);
+    return NextResponse.json(
+      {
+        connected: false,
+        tracks: [],
+        message: 'Failed to initialize Supabase admin client.',
+      },
+      { status: 500 }
+    );
+  }
+
+  const { data: token, error: tokenError } = await admin
     .from('spotify_tokens')
     .select('*')
     .eq('user_id', session.user.id)
     .maybeSingle();
 
-  if (error) {
-    console.error('[Spotify] token fetch error', error);
+  if (tokenError) {
+    console.error('[Spotify] token fetch error', tokenError);
     return NextResponse.json({ connected: false, tracks: [] });
   }
 
