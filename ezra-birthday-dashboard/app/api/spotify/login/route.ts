@@ -30,7 +30,7 @@ export async function POST() {
   cookies().set('spotify_oauth_state', state, {
     maxAge: 60 * 10,
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
   });
