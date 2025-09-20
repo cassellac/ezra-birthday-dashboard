@@ -93,26 +93,28 @@ Create a `.env.local` file with these variables:
 
 ```env
 # Supabase (Authentication & Database)
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_KEY=your_supabase_service_key
+NEXT_PUBLIC_SUPABASE_URL=YOUR_SUPABASE_PROJECT_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_KEY=YOUR_SUPABASE_SERVICE_KEY
 
 # Spotify API
-SPOTIFY_CLIENT_ID=your_spotify_client_id
-SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+SPOTIFY_CLIENT_ID=YOUR_SPOTIFY_CLIENT_ID
+SPOTIFY_CLIENT_SECRET=YOUR_SPOTIFY_CLIENT_SECRET
 
 # OpenAI API
-OPENAI_API_KEY=your_openai_api_key
+OPENAI_API_KEY=YOUR_OPENAI_API_KEY
 
 # NASA API (optional - works with DEMO_KEY)
-NASA_API_KEY=your_nasa_api_key
+NASA_API_KEY=YOUR_NASA_API_KEY
 
 # IFTTT Webhooks
-IFTTT_WEBHOOK_KEY=your_ifttt_webhook_key
+IFTTT_WEBHOOK_KEY=YOUR_IFTTT_WEBHOOK_KEY
 
 # App URL
 NEXT_PUBLIC_URL=http://localhost:3000
 ```
+
+> **Important:** The `.env.local.example` file only contains placeholder values such as `YOUR_SUPABASE_PROJECT_URL`. Copy it to `.env.local`, replace the placeholders with your real credentials locally, and configure the production values directly in Vercel's Environment Variables settings. Never commit real secrets to the repository.
 
 ### API Keys Setup
 
